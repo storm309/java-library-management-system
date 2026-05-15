@@ -22,4 +22,13 @@ public class AuthController {
     // POST /auth/register
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
-    public AuthResponse register(@R
+    public AuthResponse register(@RequestBody AuthRequest request) {
+        return userService.register(request);
+    }
+
+    // POST /auth/login
+    @PostMapping("/login")
+    public AuthResponse login(@RequestBody AuthRequest request) {
+        return userService.login(request);
+    }
+}

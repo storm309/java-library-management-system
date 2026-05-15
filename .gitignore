@@ -1,3 +1,4 @@
+### Maven / Java ###
 target/
 *.class
 *.log
@@ -8,3 +9,8 @@ target/
 .project
 *.jar
 !pom.xml
+
+### Frontend ###
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
