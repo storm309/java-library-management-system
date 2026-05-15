@@ -43,7 +43,7 @@ export default function Login() {
 
         <div className="auth-form-container">
           <h1 className="auth-heading">Welcome<br />back 👋</h1>
-          <p className="auth-subheading">Sign in to your Library Management account</p>
+          <p className="auth-subheading">Sign in to your BookSphere account</p>
 
           {error && <div className="auth-error">⚠️ {error}</div>}
 
@@ -105,6 +105,12 @@ export default function Login() {
         <div className="auth-circle-badge auth-circle-2">📖</div>
 
         <div className="auth-right-inner">
+          <div className="auth-brand-mark">
+            <div className="auth-brand-mark-icon">
+              <img src="/logo.jpg" alt="BookSphere" />
+            </div>
+            <span className="auth-brand-mark-name">BookSphere</span>
+          </div>
           {/* Card 1 — Library stats */}
           <div className="auth-float-card">
             <div className="auth-float-label">Library Stats</div>

@@ -34,8 +34,10 @@ export default function Dashboard() {
     <div className="layout">
       <aside className="sidebar">
         <div className="sidebar-brand">
-          <div className="brand-icon">📚</div>
-          <span className="brand-text">LibraryMS</span>
+          <div className="brand-icon">
+            <img src="/logo.jpg" alt="BookSphere" className="brand-logo-img" />
+          </div>
+          <span className="brand-text">BookSphere</span>
         </div>
 
         <div className="sidebar-user">

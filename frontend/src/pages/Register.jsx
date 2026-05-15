@@ -72,7 +72,7 @@ export default function Register() {
 
         <div className="auth-form-container">
           <h1 className="auth-heading">Sign Up</h1>
-          <p className="auth-subheading">Create your Library Management account</p>
+          <p className="auth-subheading">Create your BookSphere account</p>
 
           {/* Step indicator */}
           <div className="auth-steps-bar">
