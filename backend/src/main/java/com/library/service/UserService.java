@@ -73,7 +73,7 @@ public class UserService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already taken");
         }
         if (req.getEmail() != null && !req.getEmail().isEmpty() &&
-                userRepository.findByProfile_Email(req.getEmail()).isPresent()) {
+                userRepository.findByProfile_EmailIgnoreCase(req.getEmail()).isPresent()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already registered");
         }
         User user = new User();
@@ -95,10 +95,10 @@ public class UserService {
 
     /** Validate credentials — login by username OR email */
     public AuthResponse login(AuthRequest req) {
-        String identifier = req.getUsername();
+        String identifier = req.getUsername() != null ? req.getUsername().trim() : null;
         User user;
         if (identifier != null && identifier.contains("@")) {
-            user = userRepository.findByProfile_Email(identifier)
+            user = userRepository.findByProfile_EmailIgnoreCase(identifier)
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password"));
         } else {
             user = userRepository.findByUsername(identifier)
