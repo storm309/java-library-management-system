@@ -7,9 +7,20 @@ async function request(url, options = {}) {
   })
   if (!res.ok) {
     const text = await res.text()
-    let msg = text
-    try { msg = JSON.parse(text)?.message || text } catch (_) {}
-    throw new Error(msg || `Error ${res.status}`)
+    let msg = ''
+    try {
+      const json = JSON.parse(text)
+      msg = json.message || json.error || ''
+    } catch (_) {
+      msg = text
+    }
+    if (!msg || msg === 'No message available') {
+      if (res.status === 409) msg = 'Username already taken. Please choose a different one.'
+      else if (res.status === 401) msg = 'Invalid username or password.'
+      else if (res.status === 404) msg = 'Not found.'
+      else msg = `Request failed (${res.status})`
+    }
+    throw new Error(msg)
   }
   const text = await res.text()
   return text ? JSON.parse(text) : null
