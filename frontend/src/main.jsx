@@ -3,6 +3,10 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
 
+// Apply saved theme before first render to avoid flash
+const saved = localStorage.getItem('theme')
+document.documentElement.setAttribute('data-theme', saved === 'dark' ? 'dark' : 'light')
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <App />

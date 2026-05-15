@@ -41,6 +41,7 @@ public class BookService {
 
         Book book = new Book();
         book.setTitle(request.getTitle());
+        book.setImageUrl(request.getImageUrl());
         book.setAuthor(author);
         book.setCategories(categories);
 

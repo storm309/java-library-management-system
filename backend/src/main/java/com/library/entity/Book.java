@@ -22,6 +22,8 @@ public class Book {
 
     private String title;
 
+    private String imageUrl;
+
     // ── Many-to-One with Author ──────────────────────────────────────────────
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "author_id")
@@ -61,6 +63,9 @@ public class Book {
 
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
+
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 
     public Author getAuthor() { return author; }
     public void setAuthor(Author author) { this.author = author; }

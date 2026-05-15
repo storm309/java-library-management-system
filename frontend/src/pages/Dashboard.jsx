@@ -1,8 +1,15 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
 
 export default function Dashboard() {
   const navigate = useNavigate()
   const user = JSON.parse(localStorage.getItem('user') || '{}')
+  const [dark, setDark] = useState(() => localStorage.getItem('theme') === 'dark')
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light')
+    localStorage.setItem('theme', dark ? 'dark' : 'light')
+  }, [dark])
 
   const logout = () => {
     localStorage.removeItem('user')
@@ -11,7 +18,7 @@ export default function Dashboard() {
 
   const navItems = [
     { path: '/books',      icon: '📚', label: 'Books' },
-    { path: '/authors',    icon: '✍️', label: 'Authors' },
+    { path: '/authors',    icon: '✍️',  label: 'Authors' },
     { path: '/categories', icon: '🏷️', label: 'Categories' },
     { path: '/users',      icon: '👥', label: 'Users' },
   ]
@@ -20,7 +27,7 @@ export default function Dashboard() {
     <div className="layout">
       <aside className="sidebar">
         <div className="sidebar-brand">
-          <span className="brand-icon">📚</span>
+          <div className="brand-icon">📚</div>
           <span className="brand-text">LibraryMS</span>
         </div>
 
@@ -28,13 +35,17 @@ export default function Dashboard() {
           <div className="user-avatar">
             {user.name ? user.name[0].toUpperCase() : 'U'}
           </div>
-          <div>
+          <div style={{ flex: 1, minWidth: 0 }}>
             <div className="user-name">{user.name || 'User'}</div>
             <div className="user-role">@{user.username || 'user'}</div>
           </div>
+          <button className="theme-toggle" onClick={() => setDark(d => !d)} title="Toggle theme">
+            {dark ? '☀️' : '🌙'}
+          </button>
         </div>
 
         <nav className="sidebar-nav">
+          <div className="nav-section-title">Navigation</div>
           {navItems.map(item => (
             <NavLink
               key={item.path}
@@ -47,9 +58,12 @@ export default function Dashboard() {
           ))}
         </nav>
 
-        <button className="sidebar-logout" onClick={logout}>
-          🚪 Logout
-        </button>
+        <div className="sidebar-bottom">
+          <button className="sidebar-logout" onClick={logout}>
+            <span>🚪</span>
+            <span>Logout</span>
+          </button>
+        </div>
       </aside>
 
       <main className="main-content">
@@ -58,3 +72,4 @@ export default function Dashboard() {
     </div>
   )
 }
+

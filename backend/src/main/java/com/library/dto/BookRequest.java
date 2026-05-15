@@ -9,6 +9,7 @@ import java.util.List;
 public class BookRequest {
 
     private String title;
+    private String imageUrl;
     private Long authorId;
     private List<Long> categoryIds;
 
@@ -16,6 +17,9 @@ public class BookRequest {
 
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
+
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 
     public Long getAuthorId() { return authorId; }
     public void setAuthorId(Long authorId) { this.authorId = authorId; }
