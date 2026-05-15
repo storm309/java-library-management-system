@@ -7,18 +7,29 @@ async function request(url, options = {}) {
   })
   if (!res.ok) {
     const text = await res.text()
-    let msg = ''
+    let backendMsg = ''
     try {
       const json = JSON.parse(text)
-      msg = json.message || json.error || ''
-    } catch (_) {
-      msg = text
-    }
-    if (!msg || msg === 'No message available') {
-      if (res.status === 409) msg = 'Username already taken. Please choose a different one.'
-      else if (res.status === 401) msg = 'Invalid username or password.'
-      else if (res.status === 404) msg = 'Not found.'
-      else msg = `Request failed (${res.status})`
+      backendMsg = json.message || ''
+    } catch (_) {}
+
+    // Spring defaults that are not user-friendly — always override with plain English
+    const springDefaults = ['No message available', 'Conflict', 'Unauthorized', 'Not Found', 'Bad Request', 'Internal Server Error', 'Forbidden']
+    const isSpringDefault = !backendMsg || springDefaults.includes(backendMsg)
+
+    let msg = ''
+    if (!isSpringDefault) {
+      msg = backendMsg
+    } else {
+      switch (res.status) {
+        case 400: msg = 'Invalid request. Please check your inputs.'; break
+        case 401: msg = 'Incorrect username or password.'; break
+        case 403: msg = 'You do not have permission to do this.'; break
+        case 404: msg = 'The requested item was not found.'; break
+        case 409: msg = 'Username already taken. Please choose a different one.'; break
+        case 500: msg = 'Server error. Please try again later.'; break
+        default:  msg = `Something went wrong (error ${res.status}). Please try again.`
+      }
     }
     throw new Error(msg)
   }
