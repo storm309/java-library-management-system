@@ -32,6 +32,8 @@ export default function Categories() {
   const [error, setError]           = useState('')
   const [success, setSuccess]       = useState('')
 
+  const isAdmin = (() => { try { return JSON.parse(localStorage.getItem('user') || '{}').role === 'ADMIN' } catch (_) { return false } })()
+
   useEffect(() => { loadCategories() }, [])
 
   const loadCategories = async () => {
@@ -67,16 +69,18 @@ export default function Categories() {
           </div>
         </div>
         <div className="page-actions">
+          {isAdmin && (
           <button className="btn btn-primary" onClick={() => { setShowForm(s => !s); setError('') }}>
             {showForm ? '✕ Cancel' : '+ Add Category'}
           </button>
+          )}
         </div>
       </div>
 
       {error   && <div className="alert alert-error">⚠️ {error}</div>}
       {success && <div className="alert alert-success">{success}</div>}
 
-      {showForm && (
+      {isAdmin && showForm && (
         <div className="card add-form-card" style={{ marginBottom: '1.5rem' }}>
           <h3>🏷️ Add New Category</h3>
           <form onSubmit={handleAdd} className="inline-form">

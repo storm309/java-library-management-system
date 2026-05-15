@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -36,7 +37,9 @@ public class UserController {
 
     // GET /users  — Fetch all users
     @GetMapping
-    public List<User> getAllUsers() {
+    public List<User> getAllUsers(
+            @RequestHeader(value = "X-User-Id", required = false) Long userId) {
+        userService.requireAdmin(userId);
         return userService.getAllUsers();
     }
 
@@ -55,7 +58,10 @@ public class UserController {
     // DELETE /users/{id}  — (Bonus) Delete user
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteUser(@PathVariable Long id) {
+    public void deleteUser(
+            @PathVariable Long id,
+            @RequestHeader(value = "X-User-Id", required = false) Long userId) {
+        userService.requireAdmin(userId);
         userService.deleteUser(id);
     }
 

@@ -1,8 +1,14 @@
 const BASE = '/api'
 
+function getStoredUser() {
+  try { return JSON.parse(localStorage.getItem('user') || '{}') } catch (_) { return {} }
+}
+
 async function request(url, options = {}) {
+  const storedUser = getStoredUser()
+  const authHeaders = storedUser.id ? { 'X-User-Id': String(storedUser.id) } : {}
   const res = await fetch(BASE + url, {
-    headers: { 'Content-Type': 'application/json', ...options.headers },
+    headers: { 'Content-Type': 'application/json', ...authHeaders, ...options.headers },
     ...options,
   })
   if (!res.ok) {

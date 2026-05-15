@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 export default function Dashboard() {
   const navigate = useNavigate()
   const user = JSON.parse(localStorage.getItem('user') || '{}')
+  const isAdmin = user.role === 'ADMIN'
   const [dark, setDark] = useState(() => localStorage.getItem('theme') === 'dark')
 
   useEffect(() => {
@@ -21,7 +22,7 @@ export default function Dashboard() {
     { path: '/books',      icon: '📚', label: 'Books'      },
     { path: '/authors',    icon: '✍️',  label: 'Authors'   },
     { path: '/categories', icon: '🏷️', label: 'Categories' },
-    { path: '/users',      icon: '👥', label: 'Members'    },
+    ...(isAdmin ? [{ path: '/users', icon: '👥', label: 'Members' }] : []),
     { path: '/profile',    icon: '👤', label: 'My Profile' },
   ]
 
@@ -41,7 +42,7 @@ export default function Dashboard() {
           <div className="user-avatar">{initials}</div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div className="user-name">{user.name || 'User'}</div>
-            <div className="user-role">@{user.username || 'user'}</div>
+            <div className="user-role">{isAdmin ? '👑 Admin' : 'Member'}</div>
           </div>
           <button className="theme-toggle" onClick={() => setDark(d => !d)} title="Toggle dark mode">
             {dark ? '☀️' : '🌙'}

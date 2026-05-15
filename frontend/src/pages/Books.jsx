@@ -47,6 +47,7 @@ export default function Books() {
   const [selected, setSelected]     = useState(null)    // book modal
 
   const user = JSON.parse(localStorage.getItem('user') || '{}')
+  const isAdmin = user.role === 'ADMIN'
 
   useEffect(() => { loadData() }, [])
 
@@ -142,9 +143,11 @@ export default function Books() {
               onChange={e => setSearch(e.target.value)}
             />
           </div>
+          {isAdmin && (
           <button className="btn btn-primary" onClick={() => { setShowForm(s => !s); setError('') }}>
             {showForm ? '✕ Cancel' : '+ Add Book'}
           </button>
+          )}
         </div>
       </div>
 
@@ -153,7 +156,7 @@ export default function Books() {
       {success && <div className="alert alert-success">{success}</div>}
 
       {/* ── Add Form ── */}
-      {showForm && (
+      {isAdmin && showForm && (
         <div className="card add-form-card" style={{ marginBottom: '1.5rem' }}>
           <h3>📖 Add New Book</h3>
           <form onSubmit={handleAddBook}>

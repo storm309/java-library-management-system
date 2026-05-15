@@ -13,8 +13,10 @@ export default function Users() {
   const [error, setError]           = useState('')
 
   const loggedIn = JSON.parse(localStorage.getItem('user') || '{}')
+  const isAdmin = loggedIn.role === 'ADMIN'
 
   useEffect(() => {
+    if (!isAdmin) return
     usersAPI.getAll()
       .then(data => setUsers(data || []))
       .catch(err => setError(err.message))
@@ -31,6 +33,16 @@ export default function Users() {
       setUserBooks(prev => ({ ...prev, [user.id]: books }))
     } catch (err) { setError(err.message) }
     finally { setLoadingId(null) }
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="empty-state" style={{ marginTop: '3rem' }}>
+        <div className="empty-icon">🔒</div>
+        <h3>Access Restricted</h3>
+        <p>Only administrators can view the members list.</p>
+      </div>
+    )
   }
 
   return (

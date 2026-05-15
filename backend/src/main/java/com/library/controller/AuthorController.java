@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.library.entity.Author;
 import com.library.entity.Book;
 import com.library.service.AuthorService;
+import com.library.service.UserService;
 
 @RestController
 @RequestMapping("/authors")
@@ -24,10 +26,16 @@ public class AuthorController {
     @Autowired
     private AuthorService authorService;
 
+    @Autowired
+    private UserService userService;
+
     // POST /authors  — Add new author
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Author createAuthor(@RequestBody Author author) {
+    public Author createAuthor(
+            @RequestHeader(value = "X-User-Id", required = false) Long userId,
+            @RequestBody Author author) {
+        userService.requireAdmin(userId);
         return authorService.createAuthor(author);
     }
 
@@ -51,7 +59,11 @@ public class AuthorController {
 
     // PUT /authors/{id}  — Update author name and bio
     @PutMapping("/{id}")
-    public Author updateAuthor(@PathVariable Long id, @RequestBody Author author) {
+    public Author updateAuthor(
+            @PathVariable Long id,
+            @RequestHeader(value = "X-User-Id", required = false) Long userId,
+            @RequestBody Author author) {
+        userService.requireAdmin(userId);
         return authorService.updateAuthor(id, author);
     }
 }

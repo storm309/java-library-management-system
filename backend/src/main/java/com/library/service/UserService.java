@@ -11,6 +11,7 @@ import com.library.dto.AuthRequest;
 import com.library.dto.AuthResponse;
 import com.library.entity.Book;
 import com.library.entity.Profile;
+import com.library.entity.Role;
 import com.library.entity.User;
 import com.library.repository.BookRepository;
 import com.library.repository.UserRepository;
@@ -23,6 +24,18 @@ public class UserService {
 
     @Autowired
     private BookRepository bookRepository;
+
+    /** Verify caller is an ADMIN — throws 401/403 otherwise */
+    public void requireAdmin(Long userId) {
+        if (userId == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication required");
+        }
+        User caller = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid user"));
+        if (caller.getRole() != Role.ADMIN) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Admin access required");
+        }
+    }
 
     /** Create a user; profile is nested in request body and saved via CascadeType.ALL */
     public User createUser(User user) {
@@ -80,6 +93,8 @@ public class UserService {
         user.setName(req.getName());
         user.setUsername(req.getUsername());
         user.setPassword(req.getPassword());
+        // First registered user becomes ADMIN; all others are USER
+        user.setRole(userRepository.count() == 0 ? Role.ADMIN : Role.USER);
 
         Profile profile = new Profile();
         profile.setEmail(req.getEmail());
@@ -90,7 +105,7 @@ public class UserService {
 
         User saved = userRepository.save(user);
         String email = saved.getProfile() != null ? saved.getProfile().getEmail() : null;
-        return new AuthResponse(saved.getId(), saved.getName(), saved.getUsername(), email, "Registration successful");
+        return new AuthResponse(saved.getId(), saved.getName(), saved.getUsername(), email, saved.getRole().name(), "Registration successful");
     }
 
     /** Validate credentials — login by username OR email */
@@ -108,7 +123,7 @@ public class UserService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid username or password");
         }
         String email = user.getProfile() != null ? user.getProfile().getEmail() : null;
-        return new AuthResponse(user.getId(), user.getName(), user.getUsername(), email, "Login successful");
+        return new AuthResponse(user.getId(), user.getName(), user.getUsername(), email, user.getRole().name(), "Login successful");
     }
 
     /** Update own profile (name, email, phone, address, optional password) */
@@ -130,6 +145,6 @@ public class UserService {
         if (req.getAddress() != null) user.getProfile().setAddress(req.getAddress());
         User saved = userRepository.save(user);
         String email = saved.getProfile() != null ? saved.getProfile().getEmail() : null;
-        return new AuthResponse(saved.getId(), saved.getName(), saved.getUsername(), email, "Profile updated successfully");
+        return new AuthResponse(saved.getId(), saved.getName(), saved.getUsername(), email, saved.getRole().name(), "Profile updated successfully");
     }
 }

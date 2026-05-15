@@ -7,6 +7,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -35,6 +37,9 @@ public class User {
 
     @JsonIgnore
     private String password;
+
+    @Enumerated(EnumType.STRING)
+    private Role role = Role.USER;
 
     // ── One-to-One with Profile ──────────────────────────────────────────────
     @OneToOne(cascade = CascadeType.ALL)
@@ -66,4 +71,7 @@ public class User {
 
     public List<Book> getBorrowedBooks() { return borrowedBooks; }
     public void setBorrowedBooks(List<Book> borrowedBooks) { this.borrowedBooks = borrowedBooks; }
+
+    public Role getRole() { return role; }
+    public void setRole(Role role) { this.role = role; }
 }

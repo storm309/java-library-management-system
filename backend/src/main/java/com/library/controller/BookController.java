@@ -3,6 +3,7 @@ package com.library.controller;
 import com.library.dto.BookRequest;
 import com.library.entity.Book;
 import com.library.service.BookService;
+import com.library.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -16,10 +17,16 @@ public class BookController {
     @Autowired
     private BookService bookService;
 
+    @Autowired
+    private UserService userService;
+
     // POST /books  — Add new book (pass authorId + categoryIds in body)
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Book createBook(@RequestBody BookRequest request) {
+    public Book createBook(
+            @RequestHeader(value = "X-User-Id", required = false) Long userId,
+            @RequestBody BookRequest request) {
+        userService.requireAdmin(userId);
         return bookService.createBook(request);
     }
 

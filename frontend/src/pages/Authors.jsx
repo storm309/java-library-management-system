@@ -17,6 +17,8 @@ export default function Authors() {
   const [error, setError]             = useState('')
   const [success, setSuccess]         = useState('')
 
+  const isAdmin = (() => { try { return JSON.parse(localStorage.getItem('user') || '{}').role === 'ADMIN' } catch (_) { return false } })()
+
   useEffect(() => { loadAuthors() }, [])
 
   const loadAuthors = async () => {
@@ -81,16 +83,18 @@ export default function Authors() {
           </div>
         </div>
         <div className="page-actions">
+          {isAdmin && (
           <button className="btn btn-primary" onClick={() => { setShowForm(s => !s); setError('') }}>
             {showForm ? '✕ Cancel' : '+ Add Author'}
           </button>
+          )}
         </div>
       </div>
 
       {error   && <div className="alert alert-error">⚠️ {error}</div>}
       {success && <div className="alert alert-success">{success}</div>}
 
-      {showForm && (
+      {isAdmin && showForm && (
         <div className="card add-form-card" style={{ marginBottom: '1.5rem' }}>
           <h3>✍️ Add New Author</h3>
           <form onSubmit={handleAdd}>
@@ -169,17 +173,14 @@ export default function Authors() {
                       </div>
                     </div>
                     <div className="author-actions">
-                      <button
-                        className={`btn btn-sm ${isExpanded ? 'btn-secondary' : 'btn-ghost'}`}
-                        style={{ flex: 1 }}
-                        onClick={() => toggleBooks(author)}
-                        disabled={isLoading}
-                      >
+                      <button className="btn btn-sm btn-ghost" onClick={() => toggleBooks(author)} title="Toggle books">
                         {isLoading ? '...' : isExpanded
                           ? `▲ Hide (${books.length})`
                           : `📚 Books${books.length > 0 ? ` (${books.length})` : ''}`}
                       </button>
+                      {isAdmin && (
                       <button className="btn btn-sm btn-ghost" onClick={() => startEdit(author)} title="Edit">✏️</button>
+                      )}
                     </div>
 
                     {isExpanded && (
