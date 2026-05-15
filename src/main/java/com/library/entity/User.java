@@ -22,6 +22,9 @@ public class User {
     private String name;
     private String username;
 
+    @JsonIgnore
+    private String password;
+
     // ── One-to-One with Profile ──────────────────────────────────────────────
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "profile_id")
@@ -43,6 +46,9 @@ public class User {
 
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }
+
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
 
     public Profile getProfile() { return profile; }
     public void setProfile(Profile profile) { this.profile = profile; }

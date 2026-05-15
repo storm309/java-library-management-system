@@ -1,6 +1,9 @@
 package com.library.service;
 
+import com.library.dto.AuthRequest;
+import com.library.dto.AuthResponse;
 import com.library.entity.Book;
+import com.library.entity.Profile;
 import com.library.entity.User;
 import com.library.repository.BookRepository;
 import com.library.repository.UserRepository;
@@ -61,5 +64,36 @@ public class UserService {
     public List<Book> getUserBooks(Long id) {
         User user = getUserById(id);
         return bookRepository.findByBorrowedBy(user);
+    }
+
+    /** Register a new user with profile — used by /auth/register */
+    public AuthResponse register(AuthRequest req) {
+        if (userRepository.findByUsername(req.getUsername()).isPresent()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already taken");
+        }
+        User user = new User();
+        user.setName(req.getName());
+        user.setUsername(req.getUsername());
+        user.setPassword(req.getPassword());
+
+        Profile profile = new Profile();
+        profile.setEmail(req.getEmail());
+        profile.setPhone(req.getPhone());
+        profile.setAddress(req.getAddress());
+        profile.setUser(user);
+        user.setProfile(profile);
+
+        User saved = userRepository.save(user);
+        return new AuthResponse(saved.getId(), saved.getName(), saved.getUsername(), "Registration successful");
+    }
+
+    /** Validate credentials — used by /auth/login */
+    public AuthResponse login(AuthRequest req) {
+        User user = userRepository.findByUsername(req.getUsername())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid username or password"));
+        if (!req.getPassword().equals(user.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid username or password");
+        }
+        return new AuthResponse(user.getId(), user.getName(), user.getUsername(), "Login successful");
     }
 }
