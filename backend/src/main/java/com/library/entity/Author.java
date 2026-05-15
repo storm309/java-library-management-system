@@ -20,6 +20,9 @@ public class Author {
 
     private String name;
 
+    @Column(columnDefinition = "TEXT")
+    private String bio;
+
     // ── One-to-Many inverse side ─────────────────────────────────────────────
     // @JsonIgnore prevents Book → Author → books → Book loop
     @OneToMany(mappedBy = "author", fetch = FetchType.LAZY)
@@ -33,6 +36,9 @@ public class Author {
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
+
+    public String getBio() { return bio; }
+    public void setBio(String bio) { this.bio = bio; }
 
     public List<Book> getBooks() { return books; }
     public void setBooks(List<Book> books) { this.books = books; }

@@ -39,4 +39,12 @@ public class AuthorService {
         Author author = getAuthorById(id);
         return bookRepository.findByAuthor(author);
     }
+
+    /** Update author name and bio */
+    public Author updateAuthor(Long id, Author details) {
+        Author author = getAuthorById(id);
+        author.setName(details.getName());
+        author.setBio(details.getBio());
+        return authorRepository.save(author);
+    }
 }

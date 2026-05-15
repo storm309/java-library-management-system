@@ -72,6 +72,10 @@ public class UserService {
         if (userRepository.findByUsername(req.getUsername()).isPresent()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already taken");
         }
+        if (req.getEmail() != null && !req.getEmail().isEmpty() &&
+                userRepository.findByProfile_Email(req.getEmail()).isPresent()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already registered");
+        }
         User user = new User();
         user.setName(req.getName());
         user.setUsername(req.getUsername());
@@ -85,16 +89,47 @@ public class UserService {
         user.setProfile(profile);
 
         User saved = userRepository.save(user);
-        return new AuthResponse(saved.getId(), saved.getName(), saved.getUsername(), "Registration successful");
+        String email = saved.getProfile() != null ? saved.getProfile().getEmail() : null;
+        return new AuthResponse(saved.getId(), saved.getName(), saved.getUsername(), email, "Registration successful");
     }
 
-    /** Validate credentials — used by /auth/login */
+    /** Validate credentials — login by username OR email */
     public AuthResponse login(AuthRequest req) {
-        User user = userRepository.findByUsername(req.getUsername())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid username or password"));
+        String identifier = req.getUsername();
+        User user;
+        if (identifier != null && identifier.contains("@")) {
+            user = userRepository.findByProfile_Email(identifier)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password"));
+        } else {
+            user = userRepository.findByUsername(identifier)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid username or password"));
+        }
         if (!req.getPassword().equals(user.getPassword())) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid username or password");
         }
-        return new AuthResponse(user.getId(), user.getName(), user.getUsername(), "Login successful");
+        String email = user.getProfile() != null ? user.getProfile().getEmail() : null;
+        return new AuthResponse(user.getId(), user.getName(), user.getUsername(), email, "Login successful");
+    }
+
+    /** Update own profile (name, email, phone, address, optional password) */
+    public AuthResponse updateProfile(Long id, AuthRequest req) {
+        User user = getUserById(id);
+        if (req.getName() != null && !req.getName().isEmpty()) {
+            user.setName(req.getName());
+        }
+        if (req.getPassword() != null && !req.getPassword().isEmpty()) {
+            user.setPassword(req.getPassword());
+        }
+        if (user.getProfile() == null) {
+            Profile profile = new Profile();
+            profile.setUser(user);
+            user.setProfile(profile);
+        }
+        if (req.getEmail() != null) user.getProfile().setEmail(req.getEmail());
+        if (req.getPhone() != null) user.getProfile().setPhone(req.getPhone());
+        if (req.getAddress() != null) user.getProfile().setAddress(req.getAddress());
+        User saved = userRepository.save(user);
+        String email = saved.getProfile() != null ? saved.getProfile().getEmail() : null;
+        return new AuthResponse(saved.getId(), saved.getName(), saved.getUsername(), email, "Profile updated successfully");
     }
 }

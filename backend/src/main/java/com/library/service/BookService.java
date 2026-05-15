@@ -1,5 +1,12 @@
 package com.library.service;
 
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
 import com.library.dto.BookRequest;
 import com.library.entity.Author;
 import com.library.entity.Book;
@@ -9,12 +16,6 @@ import com.library.repository.AuthorRepository;
 import com.library.repository.BookRepository;
 import com.library.repository.CategoryRepository;
 import com.library.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
-
-import java.util.List;
 
 @Service
 public class BookService {
@@ -42,6 +43,8 @@ public class BookService {
         Book book = new Book();
         book.setTitle(request.getTitle());
         book.setImageUrl(request.getImageUrl());
+        book.setDescription(request.getDescription());
+        book.setPublishYear(request.getPublishYear());
         book.setAuthor(author);
         book.setCategories(categories);
 

@@ -17,11 +17,17 @@ export default function Dashboard() {
   }
 
   const navItems = [
-    { path: '/books',      icon: '📚', label: 'Books' },
-    { path: '/authors',    icon: '✍️',  label: 'Authors' },
+    { path: '/home',       icon: '🏠', label: 'Home'       },
+    { path: '/books',      icon: '📚', label: 'Books'      },
+    { path: '/authors',    icon: '✍️',  label: 'Authors'   },
     { path: '/categories', icon: '🏷️', label: 'Categories' },
-    { path: '/users',      icon: '👥', label: 'Users' },
+    { path: '/users',      icon: '👥', label: 'Members'    },
+    { path: '/profile',    icon: '👤', label: 'My Profile' },
   ]
+
+  const initials = user.name
+    ? user.name.split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase()
+    : 'U'
 
   return (
     <div className="layout">
@@ -32,20 +38,18 @@ export default function Dashboard() {
         </div>
 
         <div className="sidebar-user">
-          <div className="user-avatar">
-            {user.name ? user.name[0].toUpperCase() : 'U'}
-          </div>
+          <div className="user-avatar">{initials}</div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div className="user-name">{user.name || 'User'}</div>
             <div className="user-role">@{user.username || 'user'}</div>
           </div>
-          <button className="theme-toggle" onClick={() => setDark(d => !d)} title="Toggle theme">
+          <button className="theme-toggle" onClick={() => setDark(d => !d)} title="Toggle dark mode">
             {dark ? '☀️' : '🌙'}
           </button>
         </div>
 
         <nav className="sidebar-nav">
-          <div className="nav-section-title">Navigation</div>
+          <div className="nav-section-title">Menu</div>
           {navItems.map(item => (
             <NavLink
               key={item.path}
@@ -72,4 +76,3 @@ export default function Dashboard() {
     </div>
   )
 }
-

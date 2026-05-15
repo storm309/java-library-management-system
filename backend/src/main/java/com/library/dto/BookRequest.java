@@ -10,6 +10,8 @@ public class BookRequest {
 
     private String title;
     private String imageUrl;
+    private String description;
+    private Integer publishYear;
     private Long authorId;
     private List<Long> categoryIds;
 
@@ -20,6 +22,12 @@ public class BookRequest {
 
     public String getImageUrl() { return imageUrl; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+
+    public Integer getPublishYear() { return publishYear; }
+    public void setPublishYear(Integer publishYear) { this.publishYear = publishYear; }
 
     public Long getAuthorId() { return authorId; }
     public void setAuthorId(Long authorId) { this.authorId = authorId; }

@@ -13,7 +13,6 @@ async function request(url, options = {}) {
       backendMsg = json.message || ''
     } catch (_) {}
 
-    // Spring defaults that are not user-friendly — always override with plain English
     const springDefaults = ['No message available', 'Conflict', 'Unauthorized', 'Not Found', 'Bad Request', 'Internal Server Error', 'Forbidden']
     const isSpringDefault = !backendMsg || springDefaults.includes(backendMsg)
 
@@ -23,10 +22,10 @@ async function request(url, options = {}) {
     } else {
       switch (res.status) {
         case 400: msg = 'Invalid request. Please check your inputs.'; break
-        case 401: msg = 'Incorrect username or password.'; break
+        case 401: msg = 'Incorrect email/username or password.'; break
         case 403: msg = 'You do not have permission to do this.'; break
         case 404: msg = 'The requested item was not found.'; break
-        case 409: msg = 'Username already taken. Please choose a different one.'; break
+        case 409: msg = backendMsg.includes('Email') ? 'Email already registered. Try logging in.' : 'Username already taken. Please choose a different one.'; break
         case 500: msg = 'Server error. Please try again later.'; break
         default:  msg = `Something went wrong (error ${res.status}). Please try again.`
       }
@@ -52,6 +51,7 @@ export const booksAPI = {
 export const authorsAPI = {
   getAll: () => request('/authors'),
   create: (d) => request('/authors', { method: 'POST', body: JSON.stringify(d) }),
+  update: (id, d) => request(`/authors/${id}`, { method: 'PUT', body: JSON.stringify(d) }),
   getBooks: (id) => request(`/authors/${id}/books`),
 }
 
@@ -63,4 +63,5 @@ export const categoriesAPI = {
 export const usersAPI = {
   getAll: () => request('/users'),
   getBooks: (id) => request(`/users/${id}/books`),
+  updateProfile: (id, d) => request(`/users/${id}/profile`, { method: 'PUT', body: JSON.stringify(d) }),
 }

@@ -1,5 +1,7 @@
 package com.library.controller;
 
+import com.library.dto.AuthRequest;
+import com.library.dto.AuthResponse;
 import com.library.entity.Book;
 import com.library.entity.User;
 import com.library.service.UserService;
@@ -52,5 +54,11 @@ public class UserController {
     @GetMapping("/{id}/books")
     public List<Book> getUserBooks(@PathVariable Long id) {
         return userService.getUserBooks(id);
+    }
+
+    // PUT /users/{id}/profile  — Update own profile (name, email, phone, address, password)
+    @PutMapping("/{id}/profile")
+    public AuthResponse updateProfile(@PathVariable Long id, @RequestBody AuthRequest req) {
+        return userService.updateProfile(id, req);
     }
 }

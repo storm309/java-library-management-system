@@ -2,13 +2,14 @@ import { useState, useEffect } from 'react'
 import { authorsAPI } from '../api/api'
 
 const COVER_GRADIENTS = 10
-
 function coverClass(id) { return `cover-${id % COVER_GRADIENTS}` }
 
 export default function Authors() {
   const [authors, setAuthors]         = useState([])
   const [showForm, setShowForm]       = useState(false)
-  const [name, setName]               = useState('')
+  const [form, setForm]               = useState({ name: '', bio: '' })
+  const [editingId, setEditingId]     = useState(null)
+  const [editForm, setEditForm]       = useState({ name: '', bio: '' })
   const [expandedId, setExpandedId]   = useState(null)
   const [authorBooks, setAuthorBooks] = useState({})
   const [loadingId, setLoadingId]     = useState(null)
@@ -32,10 +33,27 @@ export default function Authors() {
 
   const handleAdd = async (e) => {
     e.preventDefault()
+    if (!form.name.trim()) { flash('error', 'Author name is required'); return }
     try {
-      await authorsAPI.create({ name })
-      flash('success', `✅ "${name}" added!`)
-      setName(''); setShowForm(false)
+      await authorsAPI.create({ name: form.name, bio: form.bio || null })
+      flash('success', `✅ "${form.name}" added!`)
+      setForm({ name: '', bio: '' }); setShowForm(false)
+      loadAuthors()
+    } catch (err) { flash('error', err.message) }
+  }
+
+  const startEdit = (author) => {
+    setEditingId(author.id)
+    setEditForm({ name: author.name, bio: author.bio || '' })
+  }
+
+  const handleEdit = async (e) => {
+    e.preventDefault()
+    if (!editForm.name.trim()) { flash('error', 'Author name is required'); return }
+    try {
+      await authorsAPI.update(editingId, { name: editForm.name, bio: editForm.bio || null })
+      flash('success', '✅ Author updated!')
+      setEditingId(null)
       loadAuthors()
     } catch (err) { flash('error', err.message) }
   }
@@ -75,11 +93,18 @@ export default function Authors() {
       {showForm && (
         <div className="card add-form-card" style={{ marginBottom: '1.5rem' }}>
           <h3>✍️ Add New Author</h3>
-          <form onSubmit={handleAdd} className="inline-form">
-            <div className="form-group">
-              <label>Author Name *</label>
-              <input type="text" placeholder="e.g. J.K. Rowling"
-                value={name} onChange={e => setName(e.target.value)} required autoFocus />
+          <form onSubmit={handleAdd}>
+            <div className="form-row">
+              <div className="form-group">
+                <label>Author Name *</label>
+                <input type="text" placeholder="e.g. J.K. Rowling"
+                  value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required autoFocus />
+              </div>
+              <div className="form-group">
+                <label>Short Bio <span style={{ fontWeight: 400, textTransform: 'none', fontSize: '0.75rem', color: 'var(--text-muted)' }}>(optional)</span></label>
+                <input type="text" placeholder="e.g. British author best known for Harry Potter"
+                  value={form.bio} onChange={e => setForm(f => ({ ...f, bio: e.target.value }))} />
+              </div>
             </div>
             <div className="form-actions">
               <button type="submit" className="btn btn-primary">Add Author</button>
@@ -91,7 +116,7 @@ export default function Authors() {
 
       {loading ? (
         <div className="empty-state" style={{ padding: '3rem' }}>
-          <div className="empty-icon" style={{ animation: 'shimmer 1.5s infinite' }}>✍️</div>
+          <div className="empty-icon">✍️</div>
           <p>Loading authors...</p>
         </div>
       ) : authors.length === 0 ? (
@@ -106,55 +131,83 @@ export default function Authors() {
             const books = authorBooks[author.id] || []
             const isExpanded = expandedId === author.id
             const isLoading = loadingId === author.id
+            const isEditing = editingId === author.id
             return (
               <div key={author.id} className="author-card">
-                <div className="author-header">
-                  <div className={`author-avatar av-${i % 6}`}>
-                    {author.name[0].toUpperCase()}
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div className="author-name">{author.name}</div>
-                    <div className="author-meta">
-                      {isExpanded && books.length > 0
-                        ? `${books.length} book${books.length !== 1 ? 's' : ''}`
-                        : 'Author'}
+                {isEditing ? (
+                  /* ── Edit inline ── */
+                  <form onSubmit={handleEdit}>
+                    <div className="form-group">
+                      <label>Name *</label>
+                      <input type="text" value={editForm.name}
+                        onChange={e => setEditForm(f => ({ ...f, name: e.target.value }))} required autoFocus />
                     </div>
-                  </div>
-                </div>
-                <div className="author-actions">
-                  <button
-                    className={`btn btn-sm ${isExpanded ? 'btn-secondary' : 'btn-ghost'}`}
-                    style={{ flex: 1 }}
-                    onClick={() => toggleBooks(author)}
-                    disabled={isLoading}
-                  >
-                    {isLoading ? '...' : isExpanded ? '▲ Hide Books' : '📚 View Books'}
-                  </button>
-                </div>
-
-                {isExpanded && (
-                  <div className="books-list-card">
-                    <div className="books-list-title">Books by {author.name}</div>
-                    {books.length === 0 ? (
-                      <p className="text-muted text-sm">No books by this author yet.</p>
-                    ) : (
-                      books.map(b => (
-                        <div key={b.id} className="book-list-item">
-                          <div className={`book-list-thumb ${coverClass(b.id)}`}>
-                            {b.title[0].toUpperCase()}
-                          </div>
-                          <div>
-                            <div className="book-list-title">{b.title}</div>
-                            <div className="book-list-author">
-                              <span className={`badge ${b.available ? 'badge-success' : 'badge-danger'}`} style={{ fontSize: '0.68rem' }}>
-                                {b.available ? '✓ Available' : '✗ Borrowed'}
-                              </span>
+                    <div className="form-group">
+                      <label>Bio</label>
+                      <input type="text" value={editForm.bio} placeholder="Short bio"
+                        onChange={e => setEditForm(f => ({ ...f, bio: e.target.value }))} />
+                    </div>
+                    <div className="form-actions">
+                      <button type="submit" className="btn btn-primary btn-sm">Save</button>
+                      <button type="button" className="btn btn-ghost btn-sm" onClick={() => setEditingId(null)}>Cancel</button>
+                    </div>
+                  </form>
+                ) : (
+                  <>
+                    <div className="author-header">
+                      <div className={`author-avatar av-${i % 6}`}>
+                        {author.name[0].toUpperCase()}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div className="author-name">{author.name}</div>
+                        {author.bio
+                          ? <div className="author-meta" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {author.bio}
                             </div>
-                          </div>
-                        </div>
-                      ))
+                          : <div className="author-meta">Author</div>
+                        }
+                      </div>
+                    </div>
+                    <div className="author-actions">
+                      <button
+                        className={`btn btn-sm ${isExpanded ? 'btn-secondary' : 'btn-ghost'}`}
+                        style={{ flex: 1 }}
+                        onClick={() => toggleBooks(author)}
+                        disabled={isLoading}
+                      >
+                        {isLoading ? '...' : isExpanded
+                          ? `▲ Hide (${books.length})`
+                          : `📚 Books${books.length > 0 ? ` (${books.length})` : ''}`}
+                      </button>
+                      <button className="btn btn-sm btn-ghost" onClick={() => startEdit(author)} title="Edit">✏️</button>
+                    </div>
+
+                    {isExpanded && (
+                      <div className="books-list-card">
+                        <div className="books-list-title">Books by {author.name}</div>
+                        {books.length === 0 ? (
+                          <p className="text-muted text-sm">No books by this author yet.</p>
+                        ) : (
+                          books.map(b => (
+                            <div key={b.id} className="book-list-item">
+                              <div className={`book-list-thumb ${coverClass(b.id)}`}>
+                                {b.title[0].toUpperCase()}
+                              </div>
+                              <div>
+                                <div className="book-list-title">{b.title}</div>
+                                <div className="book-list-author">
+                                  <span className={`badge ${b.available ? 'badge-success' : 'badge-danger'}`} style={{ fontSize: '0.68rem' }}>
+                                    {b.available ? '✓ Available' : '✗ Borrowed'}
+                                  </span>
+                                  {b.publishYear && <span className="text-muted" style={{ fontSize: '0.72rem', marginLeft: '0.4rem' }}>{b.publishYear}</span>}
+                                </div>
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
                     )}
-                  </div>
+                  </>
                 )}
               </div>
             )

@@ -38,7 +38,7 @@ export default function Books() {
   const [authors, setAuthors]       = useState([])
   const [categories, setCategories] = useState([])
   const [showForm, setShowForm]     = useState(false)
-  const [form, setForm]             = useState({ title: '', imageUrl: '', authorId: '', categoryIds: [] })
+  const [form, setForm]             = useState({ title: '', imageUrl: '', description: '', publishYear: '', authorId: '', categoryIds: [] })
   const [loading, setLoading]       = useState(true)
   const [error, setError]           = useState('')
   const [success, setSuccess]       = useState('')
@@ -74,11 +74,13 @@ export default function Books() {
       await booksAPI.create({
         title: form.title,
         imageUrl: form.imageUrl || null,
+        description: form.description || null,
+        publishYear: form.publishYear ? parseInt(form.publishYear) : null,
         authorId: parseInt(form.authorId),
         categoryIds: form.categoryIds,
       })
       flash('success', '📚 Book added successfully!')
-      setForm({ title: '', imageUrl: '', authorId: '', categoryIds: [] })
+      setForm({ title: '', imageUrl: '', description: '', publishYear: '', authorId: '', categoryIds: [] })
       setShowForm(false)
       loadData()
     } catch (err) { flash('error', err.message) }
@@ -174,6 +176,18 @@ export default function Books() {
               <input type="url" placeholder="https://example.com/cover.jpg"
                 value={form.imageUrl} onChange={e => setForm(f => ({ ...f, imageUrl: e.target.value }))} />
               <div className="form-hint">Leave blank for an auto-generated colorful cover</div>
+            </div>
+            <div className="form-row">
+              <div className="form-group">
+                <label>Publish Year <span style={{ fontWeight: 400, textTransform: 'none', fontSize: '0.75rem', color: 'var(--text-muted)' }}>(optional)</span></label>
+                <input type="number" placeholder="e.g. 2023" min="1000" max="2099"
+                  value={form.publishYear} onChange={e => setForm(f => ({ ...f, publishYear: e.target.value }))} />
+              </div>
+              <div className="form-group">
+                <label>Short Description <span style={{ fontWeight: 400, textTransform: 'none', fontSize: '0.75rem', color: 'var(--text-muted)' }}>(optional)</span></label>
+                <input type="text" placeholder="One-line description of the book"
+                  value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
+              </div>
             </div>
             <div className="form-group">
               <label>Categories * <span style={{ fontWeight: 400, textTransform: 'none', fontSize: '0.75rem', color: 'var(--text-muted)' }}>(click to select)</span></label>
@@ -272,6 +286,11 @@ export default function Books() {
               <div className="modal-body">
                 <div className="modal-title">{selected.title}</div>
                 <div className="modal-author">✍️ {selected.author?.name || 'Unknown Author'}</div>
+                {selected.description && (
+                  <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: '0.5rem 0 1rem', lineHeight: 1.6 }}>
+                    {selected.description}
+                  </p>
+                )}
                 <div className="modal-meta">
                   <div className="modal-meta-row">
                     <span className="modal-meta-label">Status</span>
@@ -279,6 +298,12 @@ export default function Books() {
                       {selected.available ? '✓ Available' : '✗ Borrowed'}
                     </span>
                   </div>
+                  {selected.publishYear && (
+                    <div className="modal-meta-row">
+                      <span className="modal-meta-label">Published</span>
+                      <span style={{ fontSize: '0.875rem', fontWeight: 600 }}>{selected.publishYear}</span>
+                    </div>
+                  )}
                   <div className="modal-meta-row">
                     <span className="modal-meta-label">Categories</span>
                     <div className="tag-list">
